@@ -10,7 +10,6 @@ import com.tencent.tinker.anno.DefaultLifeCycle;
 import com.tencent.tinker.lib.tinker.Tinker;
 import com.tencent.tinker.loader.app.DefaultApplicationLike;
 import com.tencent.tinker.loader.shareutil.ShareConstants;
-import com.tinkerpatch.sdk.TinkerPatch;
 
 
 @SuppressWarnings("unused")
@@ -52,14 +51,14 @@ public class JavaApplicationLike extends DefaultApplicationLike {
     public void onCreate() {
         super.onCreate();
 
-        // 初始化TinkerPatch
-        TinkerPatch.init(this)
-                .reflectPatchLibrary()
-                .setPatchRollbackOnScreenOff(true)
-                .setPatchRestartOnSrceenOff(true)
-                .setFetchPatchIntervalByHours(6);
-
-        TinkerPatch.with().fetchPatchUpdateAndPollWithInterval();
+//        // 初始化TinkerPatch
+//        TinkerPatch.init(this)
+//                .reflectPatchLibrary()
+//                .setPatchRollbackOnScreenOff(true)
+//                .setPatchRestartOnSrceenOff(true)
+//                .setFetchPatchIntervalByHours(6);
+//
+//        TinkerPatch.with().fetchPatchUpdateAndPollWithInterval();
     }
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
