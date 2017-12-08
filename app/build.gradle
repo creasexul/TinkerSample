@@ -1,0 +1,300 @@
+apply plugin: 'com.android.application'
+
+apply plugin: 'kotlin-android'
+
+apply plugin: 'kotlin-android-extensions'
+
+apply plugin: 'com.tencent.tinker.patch'
+//apply plugin: 'tinkerpatch-support'
+
+
+ext {
+    versionCode = 1
+    versionName = "1.0.0"
+
+    storePath = file("${buildDir}/store/")
+
+    floder = "${storePath}/app-release-1.0.0/"
+
+    oldApkPath = "${floder}app-release.apk"
+    oldMappingPath = "${floder}mapping.txt"
+    oldResPath = "${floder}R.txt"
+
+}
+
+def getStorePath() {
+    return ext.storePath
+}
+
+def getApkVersionName() {
+    return ext.versionName
+}
+
+def getOldApkPath() {
+    return ext.oldApkPath
+}
+
+def getOldMappingPath() {
+    return ext.oldMappingPath
+}
+
+def getOldResPath() {
+    return ext.oldResPath
+}
+
+android {
+    signingConfigs {
+        release {
+            keyAlias 'android'
+            keyPassword '123456'
+            storeFile file('/Users/banma/StudioProjects/bmtrip_release.keystore')
+            storePassword '123456'
+        }
+    }
+    compileSdkVersion 26
+    defaultConfig {
+        applicationId "com.xu.crease.tinkersample"
+        minSdkVersion 21
+        targetSdkVersion 26
+        versionCode versionCode
+        versionName versionName
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        buildConfigField "String", "PLATFORM", "\"all\""
+    }
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+    }
+}
+
+//tinkerpatchSupport {
+//    /** 可以在debug的时候关闭 tinkerPatch **/
+//    /** 当disable tinker的时候需要添加multiDexKeepProguard和proguardFiles,
+//     这些配置文件本身由tinkerPatch的插件自动添加，当你disable后需要手动添加
+//     你可以copy本示例中的proguardRules.pro和tinkerMultidexKeep.pro,
+//     需要你手动修改'tinker.sample.android.app'本示例的包名为你自己的包名, com.xxx前缀的包名不用修改
+//     **/
+//    tinkerEnable = true
+//    reflectApplication = false
+//    /**
+//     * 是否开启加固模式，只能在APK将要进行加固时使用，否则会patch失败。
+//     * 如果只在某个渠道使用了加固，可使用多flavors配置
+//     **/
+//    protectedApp = true
+//    /**
+//     * 实验功能
+//     * 补丁是否支持新增 Activity (新增Activity的exported属性必须为false)
+//     **/
+//    supportComponent = true
+//
+//    autoBackupApkPath = getStorePath()
+//
+//    appKey = "0f96d771fbee3b3e"
+//
+//    /** 注意: 若发布新的全量包, appVersion一定要更新 **/
+//    appVersion = getApkVersionName()
+//
+//    baseApkFile = getOldApkPath()
+//    baseProguardMappingFile = getOldMappingPath()
+//    baseResourceRFile = getOldResPath()
+//}
+
+// tinker 配置
+tinkerPatch {
+
+    //是否启用tinker
+    tinkerEnable = true
+
+//    // 需要修复的apk路径  必填(tinkerpatchSupport中已填)
+    oldApk = getOldApkPath()
+
+//    // 选填，修复后的apk路径，为空则会根据当前代码编译出一份apk用于打差分包
+    newApk = "newApkPath"
+
+//    //输出路径，默认为build/outputs/tinkerPatch/
+    outputFolder = ""
+
+    // 是否忽略警告，默认false，保持原样即可
+    ignoreWarning = false
+
+    // 是否采用buildConfig中的签名方式签名补丁包，如果为false需要手动签名
+    useSign = true
+
+    buildConfig {
+
+        // 可选(可减少补丁包大小)，为待修复apk混淆时的mapping文件(tinkerpatchSupport中已填)
+        applyMapping = getOldMappingPath()
+
+        // 可选(可减少补丁包大小和防止R文件变化导致的RemoteView异常)，为待修复apk编译时生成的R文件(tinkerpatchSupport中已填)
+        applyResourceMapping = getOldResPath()
+
+        // 标志当前补丁包所针对的apk版本，最好使用版本号作为区分
+        // 会在编译时自动写入Manifest文件
+        tinkerId = getApkVersionName()
+
+        // 是否保持待修复apk中dex分包(开启可降低补丁包大小)
+        keepDexApply = true
+
+        // 是否保持原apk内dex不变(为true时补丁包会包含所有有变的dex文件而不是差异包，仅用于加固apk中)
+        isProtectedApp = true
+
+        // 是否支持新增exported为false的Activity
+        supportHotplugComponent = false
+    }
+
+    dex {
+
+        /**
+         * 仅有两种模式 jar raw
+         * raw：保持原有格式，生成包大小比jar模式大但验证MD5时较快
+         * jar: 会对dex进行zip压缩，minSdkVersion 14以下只支持jar模式
+         *
+         * 由于默认不会验证MD5(验证tinkerId)，故默认选择jar即可
+         */
+        dexMode = "jar"
+
+        /**
+         * 需要处理的dex文件路径
+         * 文件路径为相对apk的文件路径
+         * 支持 *、？通配符
+         */
+        pattern = [
+                "classes*.dex",
+                "assets/secondary-dex-?.jar"
+        ]
+
+        /**
+         * tinker无法修改的类(必须放在主dex中)，包括以下4类
+         *
+         * 1. 自定义的application类
+         * 2. tinker库中用于加载补丁包的类(load文件夹下的)
+         * 3. 自定义的loader类(包括loader引用的类)
+         * 4. 不可修改的类
+         *
+         * PS: 1.7.6版本之后1、2会在编译时自动写入，
+         * 但采用命令行编译或者通过newApk进行打包则需手动写入
+         */
+        loader = []
+
+    }
+
+    lib {
+        // 需要处理的lib的相对apk的路径
+        pattern = [
+                "lib/*/*.so"
+        ]
+    }
+
+    res {
+        /**
+         * 需要处理的资源文件路径
+         * 必须包含所有资源文件，否则不会编译到新的apk资源文件中
+         */
+        pattern = [
+                "res/*",
+                "assets/*",
+                "resources.arsc",
+                "AndroidManifest.xml"
+        ]
+
+        // 需要忽略的已经修改的资源文件
+        ignoreChange = []
+
+        // 资源文件最大值(kb)，超过这个值将会采用bsdiff算法进行压缩(合成时复杂度增加)
+        largeModSize = 100
+    }
+
+    // 生成package_meta.text
+    packageConfig {
+        // 对应值可以通过TinkerLoadResult.getPackageConfigByName得到相应数值
+        configField("platform", "all")
+    }
+
+    // 7zip配置项(useSign = true)时生效
+    sevenZip {
+
+        // 7zip工作路径，会采用与当前平台的相符的7zip进行压缩
+        zipArtifact = "com.tencent.mm:SevenZip:1.1.10"
+
+//        // 本地7zip路径，有此项时会优先选用此项
+//        path = ""
+    }
+}
+
+// 保存正式包
+// 获取所有的渠道
+List<String> flavors = new ArrayList<String>()
+project.android.productFlavors.each {
+    flavors.add(it)
+}
+
+// 是否获取到多渠道
+boolean hasFlavors = flavors.size() > 0
+
+// 当前版本号，用作区分不同版本的apk、mapping、R文件
+def versionName = ext.versionName
+
+def projectName = project.name
+
+android.applicationVariants.all { variant ->
+    def taskName = variant.name
+
+    tasks.all {
+        if (it.name.equalsIgnoreCase("assemble${taskName.capitalize()}")) {
+            // task.doLast  task完成之后执行  对应有doFirst
+            it.doLast {
+                copy {
+                    def fileNamePrefix = "${projectName}-${variant.baseName}"
+                    def variantNamePrefix = hasFlavors ? fileNamePrefix :
+                            "${fileNamePrefix}-${versionName}"
+
+                    // 对应variant的文件保存路径
+                    def desPath = hasFlavors ?
+                            file("${getStorePath()}/${projectName}-${versionName}/${variant.flavorName}")
+                            : "${getStorePath()}/${variantNamePrefix}"
+
+                    // 复制apk文件并重命名
+                    from(variant.outputs.first().outputFile)
+                    into(desPath)
+//                    rename { fileName ->
+//                        fileName.replace("${fileNamePrefix}.apk", "${variantNamePrefix}.apk")
+//                    }
+
+                    // 复制mapping文件(混淆规则)
+                    from("${buildDir}/outputs/mapping/${variant.dirName}/mapping.txt")
+                    into(desPath)
+//                    rename { fileName ->
+//                        fileName.replace("mapping.txt", "${variantNamePrefix}-mapping.txt")
+//                    }
+
+                    // 复制R文件(保存对应id值)
+                    from("${buildDir}/intermediates/symbols/${variant.dirName}/R.txt")
+                    into(desPath)
+//                    rename { fileName ->
+//                        fileName.replace("R.txt", "${variantNamePrefix}-R.txt")
+//                    }
+                }
+            }
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+    implementation 'com.android.support:appcompat-v7:26.1.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.1'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+    //tinker的核心库
+    implementation('com.tencent.tinker:tinker-android-lib:1.9.1') { changing = true }
+//    implementation('com.tinkerpatch.sdk:tinkerpatch-android-sdk:1.2.1') { changing = true }
+    //可选，用于生成application类
+    compileOnly('com.tencent.tinker:tinker-android-anno:1.9.1') { changing = true }
+    annotationProcessor('com.tencent.tinker:tinker-android-anno:1.9.1') { changing = true }
+}
