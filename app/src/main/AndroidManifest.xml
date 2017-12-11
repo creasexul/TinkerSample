@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.xu.crease.tinkersample">
 
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:name="tinker.sample.android.app.JavaApplication"
@@ -21,6 +21,22 @@
             </intent-filter>
         </activity>
         <!--<service android:name=".ResultService" />-->
+
+        <!--<service-->
+        <!--android:name="com.tinkerpatch.sdk.tinker.service.TinkerServerResultService"-->
+        <!--android:exported="false" />-->
+
+        <!--<receiver-->
+        <!--android:name="com.tinkerpatch.sdk.server.utils.ReportBroadCast"-->
+        <!--android:exported="false" />-->
+
+        <meta-data
+            android:name="TINKER_PATCH_APP_KEY"
+            android:value="tinker_patch_0f96d771fbee3b3e" />
+
+        <meta-data
+            android:name="TINKER_PATCH_APP_VERSION"
+            android:value="tinker_patch_1.0.0" />
     </application>
 
 </manifest>

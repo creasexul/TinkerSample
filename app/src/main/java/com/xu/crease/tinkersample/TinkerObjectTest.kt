@@ -7,5 +7,5 @@ package com.xu.crease.tinkersample
  * @version 1.0
  */
 object TinkerObjectTest {
-    val toastString = "Fuck the World"
+    val toastString = "After tinker changed  "
 }

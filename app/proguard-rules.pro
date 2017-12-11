@@ -31,93 +31,21 @@
 
 #---------------------------------2.第三方包-------------------------------
 
-##okhttputils
-#-dontwarn com.zhy.http.**
-#-keep class com.zhy.http.**{*;}
-#
-##okhttp
-#-dontwarn okhttp3.**
-#-dontwarn okio.**
-#-dontwarn javax.annotation.**
-## A resource is loaded with a relative path so the package of this class must be preserved.
-#-keepnames class okhttp3.internal.publicsuffix.PublicSuffixDatabase
-#
-##okio
-#-dontwarn okio.**
-#-keep class okio.**{*;}
-#
-##AliPay
-##坑爹Ali
-#-keep class org.apache.http.{*;}
-#-dontwarn android.net.**
-#-dontwarn com.ta.utdid2.**
-#-dontwarn com.ut.device.**
-#-keep class com.ta.utdid2.** { *; }
-#-keep class com.ut.device.** { *; }
-#-keep class android.net.SSLCertificateSocketFactory{*;}
-#
-#-keep class com.alipay.android.app.IAlixPay{*;}
-#-keep class com.alipay.android.app.IAlixPay$Stub{*;}
-#-keep class com.alipay.android.app.IRemoteServiceCallback{*;}
-#-keep class com.alipay.android.app.IRemoteServiceCallback$Stub{*;}
-#-keep class com.alipay.sdk.app.PayTask{ public *;}
-#-keep class com.alipay.sdk.app.AuthTask{ public *;}
-#
-##ShareSDK
-#-keep class cn.sharesdk.**{*;}
-#-keep class com.sina.**{*;}
-#-keep class **.R$* {*;}
-#-keep class **.R{*;}
-#-keep class com.mob.**{*;}
-#-dontwarn com.mob.**
-#-dontwarn cn.sharesdk.**
-#-dontwarn **.R$*
-#
-###百度统计
-##-keep class com.baidu.bottom.** { *; }
-##-keep class com.baidu.kirin.** { *; }
-##-keep class com.baidu.mobstat.** { *; }
-#
-##友盟
-#-keep class com.umeng.commonsdk.** {*;}
-#
-###QQ
-##-keep class com.tencent.mm.opensdk.** {*;}
-##-keep class com.tencent.wxop.** {*;}
-##-keep class com.tencent.mm.sdk.** { *;}
-#
-##微信
-#-keep class com.tencent.** { *;}
-#
-###ImageSelector
-##-keep class com.esafirm.imagepicker.** { *; }
-#
-#-dontwarn com.yalantis.ucrop**
-#-keep class com.yalantis.ucrop** { *; }
-#-keep interface com.yalantis.ucrop** { *; }
-#
-##glide
-#-keep public class * implements com.bumptech.glide.module.GlideModule
-#-keep public class * extends com.bumptech.glide.module.AppGlideModule
-#-keep public enum com.bumptech.glide.load.resource.bitmap.ImageHeaderParser$** {
-#  **[] $VALUES;
-#  public *;
-#}
-
-## for DexGuard only
-#-keepresourcexmlelements manifest/application/meta-data@value=GlideModule
+#okhttputils
+-dontwarn com.tencent.tinker.**
+-dontwarn com.tinkerpatch.sdk.**
+-keep class com.tencent.tinker.**{*;}
+-keep class com.tencent.tinker.**{*;}
 
 
 #-------------------------------------------------------------------------
 
 #---------------------------------3.与js互相调用的类------------------------
-#-keep class com.whaletrip.bmtripk.utils.jsBridge.**{*;}
 
 
 #-------------------------------------------------------------------------
 
 #---------------------------------4.反射相关的类和方法-----------------------
-#-keep class com.whaletrip.bmtripk.utils.**{*;}
 
 
 #----------------------------------------------------------------------------
